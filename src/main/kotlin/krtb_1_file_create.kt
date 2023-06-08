@@ -1,22 +1,31 @@
 import java.io.File
 
 data class Word(
-    var wordEnglish: String = "",
-    var wordRussian: String = "",
+    val wordEnglish: String = "",
+    val wordRussian: String = "",
     var correctAnswersCount: Int = 0
 )
 
 fun main() {
+// Создание и наполнение файла списком слов для изучения
     val wordsFile = File("word.txt")
     wordsFile.createNewFile()
     wordsFile.writeText(
         "hello|привет\n" +
-                "dog|собака|1\n" +
-                "cat|кошка\n"
+                "dog|собака|10\n" +
+                "door|дверь|1\n" +
+                "sun|солнце|7\n" +
+                "wind|ветер|1\n" +
+                "room|комната|1\n" +
+                "truth|правда|3\n" +
+                "king|король|1\n" +
+                "victory|победа|1\n" +
+                "cat|кошка|5\n"
     )
     val listString: List<String> = wordsFile.readLines()
     val dictionary = mutableListOf<Word>()
 
+//цикл считывания строк из файла и занесение их в список
     for (line in listString) {
         val wordList = line.split("|")
         val word = Word(
@@ -25,8 +34,38 @@ fun main() {
             correctAnswersCount = if (wordList.count() >= 3) wordList[2].toInt()
             else 0
         )
-
         dictionary.add(word)
     }
-    println(dictionary)
+
+    println("Меню:\n 1 – Учить слова\n 2 – Статистика\n 0 – Выход")
+    println("Выберите пункт меню - введите его число:")
+
+// блок работы меню
+    when (checkEnterMenu(readln())) {
+        "1" -> println("Вы зашли в экран \"Учить слова\"")
+        "2" -> {
+            println("Вы зашли в экран \"Статистика\"")
+// Общее количество элементов (слов для обучения) в списке dictionary
+            val countWordInDictionary = dictionary.count()
+// Количество выученных слов в dictionary
+            val countLearnWord = dictionary.count { it.correctAnswersCount >= 3 }
+            println()
+            println("Общее количество слов для изучения: $countWordInDictionary.")
+            println("Вы уже выучили $countLearnWord слова.")
+            println("Выучено $countLearnWord из $countWordInDictionary слов " +
+                    "| ${countLearnWord.toDouble()/countWordInDictionary*100}%.")
+        }
+        "0" -> println("Мы надеемся, что наша программа была Вам полезна.\n" +
+                "Ждем Вас снова.")
+    }
+}
+
+//функция проверки вводимого пункта меню
+fun checkEnterMenu(inputString: String): String {
+    var checkItemMenu = inputString
+    while (checkItemMenu !in listOf("0", "1", "2")) {
+        println("Введите правильный пункт меню:")
+        checkItemMenu = readln()
+    }
+    return checkItemMenu
 }
