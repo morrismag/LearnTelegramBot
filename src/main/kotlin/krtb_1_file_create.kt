@@ -15,10 +15,10 @@ fun main() {
                 "dog|собака|10\n" +
                 "door|дверь|1\n" +
                 "sun|солнце|7\n" +
-                "wind|ветер|1\n" +
+                "wind|ветер|2\n" +
                 "room|комната|1\n" +
                 "truth|правда|3\n" +
-                "king|король|1\n" +
+                "king|король|0\n" +
                 "victory|победа|1\n" +
                 "cat|кошка|5\n"
     )
@@ -47,7 +47,32 @@ fun main() {
     }
 
     when (inputItem) {
-        "1" -> println("Вы зашли в экран \"Учить слова\"")
+        "1" -> {
+            println("Вы зашли в экран \"Учить слова\"")
+            var dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
+
+            while (dictionaryUnlearnWords.isNotEmpty()) {
+                dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
+                var translateWords = dictionaryUnlearnWords.shuffled().take(4)
+                var unlearnWord = (0..3).random()
+                var answer = 0
+                println("Слово: ${translateWords[unlearnWord].wordEnglish}")
+                println(
+                    "Введи правильный ответ: \n" +
+                            "1 - ${translateWords[0].wordRussian}\n" +
+                            "2 - ${translateWords[1].wordRussian}\n" +
+                            "3 - ${translateWords[2].wordRussian}\n" +
+                            "4 - ${translateWords[3].wordRussian}\n"
+                )
+
+                answer = readln().toIntOrNull() ?: 999
+                if (unlearnWord == answer) {
+
+                }
+            }
+            println("Поздравляю!!! Вы выучили все слова!")
+        }
+
         "2" -> {
             println("Вы зашли в экран \"Статистика\"")
 
