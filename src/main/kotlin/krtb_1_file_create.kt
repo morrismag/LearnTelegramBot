@@ -53,23 +53,79 @@ fun main() {
 
             while (dictionaryUnlearnWords.isNotEmpty()) {
                 dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
-                var translateWords = dictionaryUnlearnWords.shuffled().take(4)
-                var unlearnWord = (0..3).random()
-                var answer = 0
-                println("Слово: ${translateWords[unlearnWord].wordEnglish}")
-                println(
-                    "Введи правильный ответ: \n" +
-                            "1 - ${translateWords[0].wordRussian}\n" +
-                            "2 - ${translateWords[1].wordRussian}\n" +
-                            "3 - ${translateWords[2].wordRussian}\n" +
-                            "4 - ${translateWords[3].wordRussian}\n"
-                )
 
-                answer = readln().toIntOrNull() ?: 999
-                if (unlearnWord == answer) {
-
+                val n: Int = when {
+                    dictionaryUnlearnWords.size >= 4 -> 4
+                    else -> {
+                        dictionaryUnlearnWords.size
+                    }
                 }
+
+                val translateWords = dictionaryUnlearnWords.shuffled().take(n)
+                val unlearnWord = (0 until n).random()
+
+                when {
+                    n >= 4 -> {
+                        println("Слово: ${translateWords[unlearnWord].wordEnglish}")
+                        println(
+                            "Введи правильный ответ: \n" +
+                                    "1 - ${translateWords[0].wordRussian}\n" +
+                                    "2 - ${translateWords[1].wordRussian}\n" +
+                                    "3 - ${translateWords[2].wordRussian}\n" +
+                                    "4 - ${translateWords[3].wordRussian}\n"
+                        )
+                        println("0 - выход в меню")
+                    }
+
+                    n == 3 -> {
+                        println("Слово: ${translateWords[unlearnWord].wordEnglish}")
+                        println(
+                            "Введи правильный ответ: \n" +
+                                    "1 - ${translateWords[0].wordRussian}\n" +
+                                    "2 - ${translateWords[1].wordRussian}\n" +
+                                    "3 - ${translateWords[2].wordRussian}\n" +
+                                    "4 - ${dictionary[(0..dictionary.size).random()].wordRussian}\n"
+                        )
+                        println("0 - выход в меню")
+                    }
+
+                    n == 2 -> {
+                        println("Слово: ${translateWords[unlearnWord].wordEnglish}")
+                        println(
+                            "Введи правильный ответ: \n" +
+                                    "1 - ${translateWords[0].wordRussian}\n" +
+                                    "2 - ${dictionary[(0 until dictionary.size).random()].wordRussian}\n" +
+                                    "3 - ${translateWords[1].wordRussian}\n" +
+                                    "4 - ${dictionary[(0 until dictionary.size).random()].wordRussian}\n"
+                        )
+                        println("0 - выход в меню")
+                    }
+
+                    n == 1 -> {
+                        println("Слово: ${translateWords[unlearnWord].wordEnglish}")
+                        println(
+                            "Введи правильный ответ: \n" +
+                                    "1 - ${translateWords[0].wordRussian}\n" +
+                                    "2 - ${dictionary[(0 until dictionary.size).random()].wordRussian}\n" +
+                                    "3 - ${dictionary[(0 until dictionary.size).random()].wordRussian}\n" +
+                                    "4 - ${dictionary[(0 until dictionary.size).random()].wordRussian}\n"
+                        )
+                        println("0 - выход в меню")
+                    }
+                }
+                val answer = readln().toIntOrNull() ?: 999
+
+                if (unlearnWord == (answer - 1)) {
+                    println("Верно.")
+                    println()
+                    translateWords[unlearnWord].correctAnswersCount += 1
+                    saveDictionary(dictionary)
+                } else if (answer == 0) {
+                    println("Возврат к прошлому меню.")
+                    break
+                } else println("Неверно.")
             }
+
             println("Поздравляю!!! Вы выучили все слова!")
         }
 
@@ -94,3 +150,16 @@ fun main() {
         )
     }
 }
+
+fun saveDictionary(dictionary: MutableList<Word>) {
+    val wordsFileRewrite = File("word.txt")
+    wordsFileRewrite.writeText("")
+
+    dictionary.forEach {
+        wordsFileRewrite.appendText(
+            it.wordEnglish + "|" +
+                    it.wordRussian + "|" + it.correctAnswersCount + "\n"
+        )
+    }
+}
+
