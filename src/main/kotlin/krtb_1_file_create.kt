@@ -11,15 +11,15 @@ fun main() {
     val wordsFile = File("word.txt")
     wordsFile.createNewFile()
     wordsFile.writeText(
-        "hello|привет\n" +
+        "hello|привет|2\n" +
                 "dog|собака|10\n" +
                 "door|дверь|1\n" +
                 "sun|солнце|7\n" +
-                "wind|ветер|2\n" +
-                "room|комната|1\n" +
+                "wind|ветер|3\n" +
+                "room|комната\n" +
                 "truth|правда|3\n" +
-                "king|король|0\n" +
-                "victory|победа|1\n" +
+                "king|король|2\n" +
+                "victory|победа|3\n" +
                 "cat|кошка|5\n"
     )
     val listString: List<String> = wordsFile.readLines()
@@ -37,6 +37,7 @@ fun main() {
         dictionary.add(word)
     }
 
+
     println("Меню:\n 1 – Учить слова\n 2 – Статистика\n 0 – Выход")
     println("Выберите пункт меню - введите его число:")
     var inputItem = readln()
@@ -51,7 +52,7 @@ fun main() {
             println("Вы зашли в экран \"Учить слова\"")
             var dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
 
-            while (dictionaryUnlearnWords.isNotEmpty()) {
+            while ((dictionary.filter { it.correctAnswersCount < 3 }).isNotEmpty()) {
                 dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
 
                 val n: Int = when {
