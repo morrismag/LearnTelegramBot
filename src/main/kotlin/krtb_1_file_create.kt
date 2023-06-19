@@ -126,6 +126,7 @@ fun learnWords(dictionary: MutableList<Word>) {
                     "3 - ${translateWords[2].wordRussian}\n" +
                     "4 - ${translateWords[3].wordRussian}\n"
         )
+
         println("0 - выход в меню")
 
         val answer = readln().toIntOrNull() ?: 999
