@@ -100,7 +100,7 @@ fun createFileDictionary(nameFile: String): File {
 }
 
 fun learnWords(dictionary: MutableList<Word>) {
-    var dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
+    var dictionaryUnlearnWords: List<Word>
 
     while (true) {
         dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
@@ -126,19 +126,21 @@ fun learnWords(dictionary: MutableList<Word>) {
                     "3 - ${translateWords[2].wordRussian}\n" +
                     "4 - ${translateWords[3].wordRussian}\n"
         )
-
         println("0 - выход в меню")
 
-        val answer = readln().toIntOrNull() ?: 999
+        val answerId = readln().toIntOrNull()
+        val correctAnswerId = translateWords.indexOf(unlearnWord) + 1
 
-        if (answer in (1..4) && unlearnWord.wordEnglish == translateWords[answer - 1].wordEnglish) {
-            println("Верно.")
-            println()
-            unlearnWord.correctAnswersCount += 1
-            saveDictionary(dictionary)
-        } else if (answer == 0) {
-            println("Возврат к прошлому меню.")
-            break
-        } else println("Неверно.")
+        when (answerId) {
+            correctAnswerId -> {
+                println("Верно.")
+                println()
+                unlearnWord.correctAnswersCount += 1
+                saveDictionary(dictionary)
+            }
+
+            0 -> break
+            else -> println("Неверно.")
+        }
     }
 }
