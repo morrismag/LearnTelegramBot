@@ -1,5 +1,3 @@
-import java.io.File
-
 data class Word(
     val wordEnglish: String = "",
     val wordRussian: String = "",
@@ -7,90 +5,47 @@ data class Word(
 )
 
 fun main() {
-    /** Создание и наполнение файла списком слов для изучения*/
-    val wordsFile = File("word.txt")
-    wordsFile.createNewFile()
-    wordsFile.writeText(
-        "hello|привет\n" +
-                "dog|собака|10\n" +
-                "door|дверь|1\n" +
-                "sun|солнце|7\n" +
-                "wind|ветер|2\n" +
-                "room|комната|1\n" +
-                "truth|правда|3\n" +
-                "king|король|0\n" +
-                "victory|победа|1\n" +
-                "cat|кошка|5\n"
-    )
-    val listString: List<String> = wordsFile.readLines()
-    val dictionary = mutableListOf<Word>()
 
-    /**цикл считывания строк из файла и занесение их в список*/
-    for (line in listString) {
-        val wordList = line.split("|")
-        val word = Word(
-            wordEnglish = wordList[0],
-            wordRussian = wordList[1],
-            correctAnswersCount = if (wordList.count() >= 3) wordList[2].toInt()
-            else 0
-        )
-        dictionary.add(word)
+    val trainer = try {
+
+        LearnWordsTrainer(3, 4)
+    } catch (e: Exception) {
+        println("Невозможно загрузить файл")
+        return
     }
 
-    println("Меню:\n 1 – Учить слова\n 2 – Статистика\n 0 – Выход")
-    println("Выберите пункт меню - введите его число:")
-    var inputItem = readln()
+    while (true) {
 
-    while (inputItem !in listOf("0", "1", "2")) {
-        println("Введите правильный пункт меню:")
-        inputItem = readln()
-    }
+        println("Меню:\n 1 – Учить слова\n 2 – Статистика\n 0 – Выход")
+        println("Выберите пункт меню - введите его число:")
 
-    when (inputItem) {
-        "1" -> {
-            println("Вы зашли в экран \"Учить слова\"")
-            var dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
-
-            while (dictionaryUnlearnWords.isNotEmpty()) {
-                dictionaryUnlearnWords = dictionary.filter { it.correctAnswersCount < 3 }
-                var translateWords = dictionaryUnlearnWords.shuffled().take(4)
-                var unlearnWord = (0..3).random()
-                var answer = 0
-                println("Слово: ${translateWords[unlearnWord].wordEnglish}")
-                println(
-                    "Введи правильный ответ: \n" +
-                            "1 - ${translateWords[0].wordRussian}\n" +
-                            "2 - ${translateWords[1].wordRussian}\n" +
-                            "3 - ${translateWords[2].wordRussian}\n" +
-                            "4 - ${translateWords[3].wordRussian}\n"
-                )
-
-                answer = readln().toIntOrNull() ?: 999
-                if (unlearnWord == answer) {
-
-                }
+        when (readln()) {
+            "1" -> {
+                println("Вы зашли в экран \"Учить слова\"")
+                trainer.learnWords(trainer.dictionary)
             }
-            println("Поздравляю!!! Вы выучили все слова!")
+
+            "2" -> {
+                val statistics = trainer.getStatistics()
+                println("Вы зашли в экран \"Статистика\"")
+                println()
+                println(
+                    "Выучено ${statistics.countLearnWord} из ${statistics.countWordInDictionary} слов" +
+                            "| ${statistics.countLearnWord.toDouble() / statistics.countWordInDictionary * 100}%."
+                )
+                println()
+            }
+
+            "0" -> {
+                println(
+                    "Мы надеемся, что наша программа была Вам полезна.\n" +
+                            "Ждем Вас снова."
+                )
+                return
+            }
+
+            else -> println("Введите правильный пункт меню:\n")
         }
-
-        "2" -> {
-            println("Вы зашли в экран \"Статистика\"")
-
-            /** Общее количество элементов (слов для обучения) в списке dictionary*/
-            val countWordInDictionary = dictionary.count()
-
-            /** Количество выученных слов в dictionary*/
-            val countLearnWord = dictionary.count { it.correctAnswersCount >= 3 }
-            println()
-            println(
-                "Выучено $countLearnWord из $countWordInDictionary слов" +
-                        "| ${countLearnWord.toDouble() / countWordInDictionary * 100}%."
-            )
-        }
-
-        "0" -> println(
-            "Мы надеемся, что наша программа была Вам полезна.\n" +
-                    "Ждем Вас снова."
-        )
     }
 }
+
