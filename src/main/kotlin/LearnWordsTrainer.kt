@@ -1,4 +1,3 @@
-
 import java.io.File
 
 class Statistics(
@@ -6,7 +5,11 @@ class Statistics(
     val countLearnWord: Int,
 )
 
-class LearnWordsTrainer(private val unlearnWords: Int = 3, private val countOfQuestionWords: Int = 4) {
+class LearnWordsTrainer(
+    private val unlearnWords: Int = 3,
+    private val countOfQuestionWords: Int = 4,
+    private val fileName: String = "word.txt",
+) {
     val dictionary = loadDictionary()
 
     fun learnWords(dictionary: List<Word>) {
@@ -29,15 +32,7 @@ class LearnWordsTrainer(private val unlearnWords: Int = 3, private val countOfQu
                     translateWords + dictionaryLearnedWords.shuffled().take(countOfQuestionWords - translateWords.size)
             }
 
-            println("Слово: ${unlearnWord.wordEnglish}")
-            println(
-                "Введи правильный ответ: \n" +
-                        "1 - ${translateWords[0].wordRussian}\n" +
-                        "2 - ${translateWords[1].wordRussian}\n" +
-                        "3 - ${translateWords[2].wordRussian}\n" +
-                        "4 - ${translateWords[3].wordRussian}\n"
-            )
-            println("0 - выход в меню")
+            println(questionToString(translateWords, unlearnWord))
 
             val answerId = readln().toIntOrNull()
             val correctAnswerId = translateWords.indexOf(unlearnWord) + 1
@@ -62,8 +57,8 @@ class LearnWordsTrainer(private val unlearnWords: Int = 3, private val countOfQu
         return Statistics(countWordInDictionary, countLearnWord)
     }
 
-    private fun createFileDictionary(nameFile: String): File {
-        val wordsFile = File(nameFile)
+    private fun createFileDictionary(): File {
+        val wordsFile = File(fileName)
         wordsFile.createNewFile()
         wordsFile.writeText(
             "hello|привет|2\n" +
@@ -83,10 +78,9 @@ class LearnWordsTrainer(private val unlearnWords: Int = 3, private val countOfQu
     private fun loadDictionary(): List<Word> {
         try {
             val dictionary = mutableListOf<Word>()
-            val fileName = "word.txt"
             val wordsFile = File(fileName)
 
-            if (!wordsFile.exists()) createFileDictionary(fileName)
+            if (!wordsFile.exists()) createFileDictionary()
 
             val listString: List<String> = wordsFile.readLines()
 
@@ -107,7 +101,7 @@ class LearnWordsTrainer(private val unlearnWords: Int = 3, private val countOfQu
     }
 
     private fun saveDictionary(dictionary: List<Word>) {
-        val wordsFileRewrite = File("word.txt")
+        val wordsFileRewrite = File(fileName)
         wordsFileRewrite.writeText("")
 
         dictionary.forEach {
@@ -116,5 +110,12 @@ class LearnWordsTrainer(private val unlearnWords: Int = 3, private val countOfQu
                         it.wordRussian + "|" + it.correctAnswersCount + "\n"
             )
         }
+    }
+
+    private fun questionToString(translateWords: List<Word>, unlearnWord: Word): String {
+        val variantWord = translateWords
+            .mapIndexed { index: Int, word: Word -> "${index + 1} - ${word.wordRussian}" }
+            .joinToString(separator = "\n")
+        return unlearnWord.wordEnglish + "\n" + variantWord + "\n0 - выйти в меню"
     }
 }
