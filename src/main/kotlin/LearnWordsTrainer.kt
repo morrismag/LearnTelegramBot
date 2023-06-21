@@ -139,7 +139,6 @@ class LearnWordsTrainer(
                 false
             }
         } ?: false
-
     }
 }
 
