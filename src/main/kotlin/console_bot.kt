@@ -21,7 +21,7 @@ fun main() {
         when (readln()) {
             "1" -> {
                 println("Вы зашли в экран \"Учить слова\"")
-                learnWords(trainer.dictionary)
+                learnWords(trainer.dictionary, trainer)
             }
 
             "2" -> {
@@ -48,30 +48,22 @@ fun main() {
     }
 }
 
-fun learnWords(dictionary: List<Word>) {
-    val trainerWord = LearnWordsTrainer()
+fun learnWords(dictionary: List<Word>, trainer: LearnWordsTrainer) {
 
     while (true) {
-        val question = trainerWord.getNextQuestion()
+        val question = trainer.getNextQuestion()
 
         if (question == null) {
             println("Поздравляю!!! Вы выучили все слова!")
             break
         }
 
-        if (question.variants.size < trainerWord.countOfQuestionWords) {
-            val dictionaryLearnedWords = dictionary.filter { it.correctAnswersCount >= trainerWord.unlearnWords }
-            question.variants =
-                question.variants + dictionaryLearnedWords.shuffled()
-                    .take(trainerWord.countOfQuestionWords - question.variants.size)
-        }
-
         println(question.asConsoleString())
-
         val answerId = readln().toIntOrNull()
+
         if (answerId == 0) break
 
-        if (trainerWord.checkAnswer(answerId?.minus(1))) {
+        if (trainer.checkAnswer(answerId?.minus(1))) {
             println("Верно.")
         } else println("Неверно.")
     }

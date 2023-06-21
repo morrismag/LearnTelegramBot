@@ -27,8 +27,15 @@ class LearnWordsTrainer(
     fun getNextQuestion(): Question? {
         val dictionaryUnlearnWords: List<Word> = dictionary.filter { it.correctAnswersCount < unlearnWords }
         if (dictionaryUnlearnWords.isEmpty()) return null
-        val translateWords = dictionaryUnlearnWords.shuffled().take(countOfQuestionWords)
-        val unlearnWord = translateWords.random()
+        var translateWords = dictionaryUnlearnWords.shuffled().take(countOfQuestionWords)
+
+        if (dictionaryUnlearnWords.size < countOfQuestionWords) {
+            val dictionaryLearnedWords = dictionary.filter { it.correctAnswersCount >= unlearnWords }
+            translateWords = dictionaryUnlearnWords + dictionaryLearnedWords.shuffled()
+                .take(countOfQuestionWords - dictionaryUnlearnWords.size)
+        }
+
+        val unlearnWord = dictionaryUnlearnWords.random()
         question = Question(
             variants = translateWords,
             correctAnswer = unlearnWord,
