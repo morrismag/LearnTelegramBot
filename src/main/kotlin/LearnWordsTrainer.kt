@@ -11,47 +11,42 @@ data class Question(
 )
 
 class LearnWordsTrainer(
-    private val unlearnWords: Int = 3,
-    private val countOfQuestionWords: Int = 4,
+    val unlearnWords: Int = 3,
+    val countOfQuestionWords: Int = 4,
     private val fileName: String = "word.txt",
 ) {
     private var question: Question? = null
     val dictionary = loadDictionary()
 
-    fun learnWords(dictionary: List<Word>) {
-
-
-        while (true) {
-            val question = getNextQuestion()
-
-            if (question == null) {
-                println("Поздравляю!!! Вы выучили все слова!")
-                break
-            }
-
-            if (question.variants.size < countOfQuestionWords) {
-                val dictionaryLearnedWords = dictionary.filter { it.correctAnswersCount >= unlearnWords }
-                question.variants =
-                    question.variants + dictionaryLearnedWords.shuffled()
-                        .take(countOfQuestionWords - question.variants.size)
-            }
-
-            println(question.asConsoleString())
-
-            val answerId = readln().toIntOrNull()
-            if (answerId == 0) break
-
-            if (checkAnswer(answerId?.minus(1))) {
-                println("Верно.")
-            } else println("Неверно.")
-        }
-    }
-
-
     fun getStatistics(): Statistics {
         val countWordInDictionary = dictionary.count()
         val countLearnWord = dictionary.count { it.correctAnswersCount >= unlearnWords }
         return Statistics(countWordInDictionary, countLearnWord)
+    }
+
+    fun getNextQuestion(): Question? {
+        val dictionaryUnlearnWords: List<Word> = dictionary.filter { it.correctAnswersCount < unlearnWords }
+        if (dictionaryUnlearnWords.isEmpty()) return null
+        val translateWords = dictionaryUnlearnWords.shuffled().take(countOfQuestionWords)
+        val unlearnWord = translateWords.random()
+        question = Question(
+            variants = translateWords,
+            correctAnswer = unlearnWord,
+        )
+        return question
+    }
+
+    fun checkAnswer(userAnswerIndex: Int?): Boolean {
+        return question?.let {
+            val correctAnswerId = it.variants.indexOf(it.correctAnswer)
+            if (correctAnswerId == userAnswerIndex) {
+                it.correctAnswer.correctAnswersCount += 1
+                saveDictionary(dictionary)
+                true
+            } else {
+                false
+            }
+        } ?: false
     }
 
     private fun createFileDictionary(): File {
@@ -109,36 +104,6 @@ class LearnWordsTrainer(
         }
     }
 
-    private fun Question.asConsoleString(): String {
-        val variantWord = this.variants
-            .mapIndexed { index: Int, word: Word -> "${index + 1} - ${word.wordRussian}" }
-            .joinToString(separator = "\n")
-        return this.correctAnswer.wordEnglish + "\n" + variantWord + "\n0 - выйти в меню"
-    }
 
-    private fun getNextQuestion(): Question? {
-        val dictionaryUnlearnWords: List<Word> = dictionary.filter { it.correctAnswersCount < unlearnWords }
-        if (dictionaryUnlearnWords.isEmpty()) return null
-        val translateWords = dictionaryUnlearnWords.shuffled().take(countOfQuestionWords)
-        val unlearnWord = translateWords.random()
-        question = Question(
-            variants = translateWords,
-            correctAnswer = unlearnWord,
-        )
-        return question
-    }
-
-    private fun checkAnswer(userAnswerIndex: Int?): Boolean {
-        return question?.let {
-            val correctAnswerId = it.variants.indexOf(it.correctAnswer)
-            if (correctAnswerId == userAnswerIndex) {
-                it.correctAnswer.correctAnswersCount += 1
-                saveDictionary(dictionary)
-                true
-            } else {
-                false
-            }
-        } ?: false
-    }
 }
 
