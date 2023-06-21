@@ -11,12 +11,12 @@ data class Question(
 )
 
 class LearnWordsTrainer(
-    val unlearnWords: Int = 3,
-    val countOfQuestionWords: Int = 4,
+    private val unlearnWords: Int = 3,
+    private val countOfQuestionWords: Int = 4,
     private val fileName: String = "word.txt",
 ) {
     private var question: Question? = null
-    val dictionary = loadDictionary()
+    private val dictionary = loadDictionary()
 
     fun getStatistics(): Statistics {
         val countWordInDictionary = dictionary.count()

@@ -7,7 +7,6 @@ data class Word(
 fun main() {
 
     val trainer = try {
-
         LearnWordsTrainer(3, 4)
     } catch (e: Exception) {
         println("Невозможно загрузить файл")
@@ -21,7 +20,7 @@ fun main() {
         when (readln()) {
             "1" -> {
                 println("Вы зашли в экран \"Учить слова\"")
-                learnWords(trainer.dictionary, trainer)
+                learnWords(trainer)
             }
 
             "2" -> {
@@ -48,7 +47,7 @@ fun main() {
     }
 }
 
-fun learnWords(dictionary: List<Word>, trainer: LearnWordsTrainer) {
+fun learnWords(trainer: LearnWordsTrainer) {
 
     while (true) {
         val question = trainer.getNextQuestion()
