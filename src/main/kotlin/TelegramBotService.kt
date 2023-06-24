@@ -6,9 +6,10 @@ import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 
 class TelegramBotService {
+     private val botToken = "6285859188:AAE09dXS_kjaDM1p__S_NgovRJilcvdUbcY"
 
-    fun getUpdates(botToken: String, updateId: Int): String {
-        val urlGetUpdates = "https://api.telegram.org/bot$botToken/getUpdates?offset=$updateId"
+    fun getUpdates(updateId: Int): String {
+        val urlGetUpdates = "$URL_API_TELEGRAM$botToken/getUpdates?offset=$updateId"
         val client: HttpClient = HttpClient.newBuilder().build()
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdates)).build()
         val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
@@ -16,13 +17,13 @@ class TelegramBotService {
         return response.body()
     }
 
-    fun sendMessage(botToken: String, chatId: Int, messageText: String): String {
+    fun sendMessage(chatId: Int, messageText: String): String {
         val encoded = URLEncoder.encode(
             messageText,
             StandardCharsets.UTF_8
         )
         println(encoded)
-        val urlSendMessage = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$chatId&text=$encoded"
+        val urlSendMessage = "$URL_API_TELEGRAM$botToken/sendMessage?chat_id=$chatId&text=$encoded"
         val client: HttpClient = HttpClient.newBuilder().build()
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
         val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
@@ -30,8 +31,8 @@ class TelegramBotService {
         return response.body()
     }
 
-    fun sendMenu(botToken: String, chatId: Int): String {
-        val urlSendMessage = "https://api.telegram.org/bot$botToken/sendMessage"
+    fun sendMenu(chatId: Int): String {
+        val urlSendMessage = "$URL_API_TELEGRAM$botToken/sendMessage"
         val sendMenuBody = """
             {
             	"chat_id": $chatId,
@@ -65,8 +66,8 @@ class TelegramBotService {
         return response.body()
     }
 
-    private fun sendQuestion(botToken: String, chatId: Int, inputQuestion: Question): String {
-        val urlSendMessage = "https://api.telegram.org/bot$botToken/sendMessage"
+    private fun sendQuestion(chatId: Int, inputQuestion: Question): String {
+        val urlSendMessage = "$URL_API_TELEGRAM$botToken/sendMessage"
         val sendMessageBody = """
             {
             	"chat_id": $chatId,
@@ -110,12 +111,12 @@ class TelegramBotService {
         return response.body()
     }
 
-    fun checkNextQuestionAndSend(trainer: LearnWordsTrainer, botToken: String, numberChatID: Int) {
+    fun checkNextQuestionAndSend(trainer: LearnWordsTrainer, numberChatID: Int) {
         val question = trainer.getNextQuestion()
         if (question != null) {
-            sendQuestion(botToken, numberChatID, question)
+            sendQuestion(numberChatID, question)
         } else {
-            sendMessage(botToken, numberChatID, "Вы выучили все слова в базе.")
+            sendMessage(numberChatID, "Вы выучили все слова в базе.")
         }
     }
 }
@@ -123,3 +124,4 @@ class TelegramBotService {
 const val LEARN_WORDS = "learn_words_clicked"
 const val STATISTICS = "statistics_clicked"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
+const val URL_API_TELEGRAM = "https://api.telegram.org/bot"
