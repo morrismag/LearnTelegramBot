@@ -67,38 +67,49 @@ class TelegramBotService(private val botToken: String) {
 
     private fun sendQuestion(chatId: Int, inputQuestion: Question): String {
         val urlSendMessage = "$URL_API_TELEGRAM$botToken/sendMessage"
+
+        val  button = inputQuestion.variants.forEachIndexed { index, word ->
+            "{\"text\": \"${word.wordRussian}\"\n" +
+            "\"callback_data\": \"${CALLBACK_DATA_ANSWER_PREFIX + index}\"},"
+        }.toString()
+
+        println(button)
+
+
+        val buttonsText = """
+            [
+                {
+                    "text": "${inputQuestion.variants[0].wordRussian}",
+                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 0}"
+                },
+                {
+                    "text": "${inputQuestion.variants[1].wordRussian}",
+                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 1}"
+                },
+                {
+                    "text": "${inputQuestion.variants[2].wordRussian}",
+                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 2}"
+                },
+                {
+                    "text": "${inputQuestion.variants[3].wordRussian}",
+                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 3}"
+                }                     
+            ]
+        """.trimIndent()
+
         val sendMessageBody = """
             {
             	"chat_id": $chatId,
             	"text": "${inputQuestion.correctAnswer.wordEnglish}",
             	"reply_markup": {
             		"inline_keyboard": [
-            			[
-            				{
-            					"text": "${inputQuestion.variants[0].wordRussian}",
-            					"callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 0}"
-
-            				},
-            				{
-            					"text": "${inputQuestion.variants[1].wordRussian}",
-            					"callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 1}"
-
-            				},
-            				{
-            					"text": "${inputQuestion.variants[2].wordRussian}",
-            					"callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 2}"
-
-            				},
-            				{
-            					"text": "${inputQuestion.variants[3].wordRussian}",
-            					"callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 3}"
-
-            				}                        
-            			]
+            			$buttonsText
             		]
             	}
             }
         """.trimIndent()
+
+        println(sendMessageBody)
 
         val client: HttpClient = HttpClient.newBuilder().build()
         val request: HttpRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage))
