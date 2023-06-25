@@ -5,8 +5,7 @@ import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.charset.StandardCharsets
 
-class TelegramBotService {
-     private val botToken = "6285859188:AAE09dXS_kjaDM1p__S_NgovRJilcvdUbcY"
+class TelegramBotService(private val botToken: String) {
 
     fun getUpdates(updateId: Int): String {
         val urlGetUpdates = "$URL_API_TELEGRAM$botToken/getUpdates?offset=$updateId"
@@ -111,17 +110,19 @@ class TelegramBotService {
         return response.body()
     }
 
-    fun checkNextQuestionAndSend(trainer: LearnWordsTrainer, numberChatID: Int) {
-        val question = trainer.getNextQuestion()
+    fun checkNextQuestionAndSend(question: Question?, numberChatID: Int) {
         if (question != null) {
             sendQuestion(numberChatID, question)
         } else {
             sendMessage(numberChatID, "Вы выучили все слова в базе.")
         }
     }
+
+    companion object {
+        const val LEARN_WORDS = "learn_words_clicked"
+        const val STATISTICS = "statistics_clicked"
+        const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
+        const val URL_API_TELEGRAM = "https://api.telegram.org/bot"
+    }
 }
 
-const val LEARN_WORDS = "learn_words_clicked"
-const val STATISTICS = "statistics_clicked"
-const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
-const val URL_API_TELEGRAM = "https://api.telegram.org/bot"

@@ -1,11 +1,13 @@
+import TelegramBotService.Companion.CALLBACK_DATA_ANSWER_PREFIX
+import TelegramBotService.Companion.LEARN_WORDS
+import TelegramBotService.Companion.STATISTICS
+
 fun main(args: Array<String>) {
 
-//    val botToken = args[0]
-//    println(botToken)
+    val botToken = args[0]
     var updateId = 0
-    val telegramBotService = TelegramBotService()
+    val telegramBotService = TelegramBotService(botToken)
     val trainer = LearnWordsTrainer()
-    val question = trainer.getNextQuestion()
 
     val updateIdRegex: Regex = "\"update_id\":(.+?),".toRegex()
     val chatIdRegex: Regex = "\"chat\":\\{\"id\":(\\d+),".toRegex()
@@ -32,36 +34,36 @@ fun main(args: Array<String>) {
         }
 
         if (data?.lowercase() == LEARN_WORDS && numberChatID != null) {
-            telegramBotService.checkNextQuestionAndSend(trainer, numberChatID)
+            telegramBotService.checkNextQuestionAndSend(trainer.getNextQuestion(), numberChatID)
         }
 
-        if (data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true && numberChatID != null)
-        {
+        if (data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true && numberChatID != null) {
             val indexWord = updates.substringAfterLast(CALLBACK_DATA_ANSWER_PREFIX).substringBefore('"')
             println(indexWord)
 
             if (trainer.checkAnswer(indexWord.toInt())) {
                 telegramBotService.sendMessage(numberChatID, "Правильно")
-            }
-                else {
-                telegramBotService.sendMessage(numberChatID,
+            } else {
+                telegramBotService.sendMessage(
+                    numberChatID,
                     "Не правильно: ${trainer.question?.correctAnswer?.wordEnglish} - " +
-                            "${trainer.question?.correctAnswer?.wordRussian}")
+                            "${trainer.question?.correctAnswer?.wordRussian}"
+                )
             }
-            telegramBotService.checkNextQuestionAndSend(trainer, numberChatID)
+            telegramBotService.checkNextQuestionAndSend(trainer.getNextQuestion(), numberChatID)
         }
 
-            val wordForStatistics = trainer.getStatistics()
-            val textStatistics = "\"Выучено ${wordForStatistics.countLearnWord} из " +
-                    "${wordForStatistics.countWordInDictionary} слов" +
-                    " | ${
-                        wordForStatistics.countLearnWord.toDouble() /
-                                wordForStatistics.countWordInDictionary * 100
-                    }%\""
+        val wordForStatistics = trainer.getStatistics()
+        val textStatistics = "\"Выучено ${wordForStatistics.countLearnWord} из " +
+                "${wordForStatistics.countWordInDictionary} слов" +
+                " | ${
+                    wordForStatistics.countLearnWord.toDouble() /
+                            wordForStatistics.countWordInDictionary * 100
+                }%\""
 
-            if (data?.lowercase() == STATISTICS && numberChatID != null) {
-                telegramBotService.sendMessage(numberChatID, textStatistics)
-            }
+        if (data?.lowercase() == STATISTICS && numberChatID != null) {
+            telegramBotService.sendMessage(numberChatID, textStatistics)
         }
+    }
 }
 
