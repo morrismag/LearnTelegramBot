@@ -68,34 +68,10 @@ class TelegramBotService(private val botToken: String) {
     private fun sendQuestion(chatId: Int, inputQuestion: Question): String {
         val urlSendMessage = "$URL_API_TELEGRAM$botToken/sendMessage"
 
-        val  button = inputQuestion.variants.forEachIndexed { index, word ->
-            "{\"text\": \"${word.wordRussian}\"\n" +
-            "\"callback_data\": \"${CALLBACK_DATA_ANSWER_PREFIX + index}\"},"
-        }.toString()
-
-        println(button)
-
-
-        val buttonsText = """
-            [
-                {
-                    "text": "${inputQuestion.variants[0].wordRussian}",
-                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 0}"
-                },
-                {
-                    "text": "${inputQuestion.variants[1].wordRussian}",
-                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 1}"
-                },
-                {
-                    "text": "${inputQuestion.variants[2].wordRussian}",
-                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 2}"
-                },
-                {
-                    "text": "${inputQuestion.variants[3].wordRussian}",
-                    "callback_data": "${CALLBACK_DATA_ANSWER_PREFIX + 3}"
-                }                     
-            ]
-        """.trimIndent()
+        val buttonText = inputQuestion.variants.mapIndexed { index, word ->
+            "{\n\"text\": \"${word.wordRussian}\",\n" +
+                    "\"callback_data\": \"${CALLBACK_DATA_ANSWER_PREFIX + index}\"\n}"
+        }.joinToString()
 
         val sendMessageBody = """
             {
@@ -103,7 +79,9 @@ class TelegramBotService(private val botToken: String) {
             	"text": "${inputQuestion.correctAnswer.wordEnglish}",
             	"reply_markup": {
             		"inline_keyboard": [
-            			$buttonsText
+            [
+            			$buttonText
+            ]
             		]
             	}
             }
