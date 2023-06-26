@@ -1,40 +1,69 @@
+import TelegramBotService.Companion.CALLBACK_DATA_ANSWER_PREFIX
+import TelegramBotService.Companion.LEARN_WORDS
+import TelegramBotService.Companion.STATISTICS
+
 fun main(args: Array<String>) {
 
     val botToken = args[0]
     var updateId = 0
-    val telegramBotService = TelegramBotService()
+    val telegramBotService = TelegramBotService(botToken)
+    val trainer = LearnWordsTrainer()
+
+    val updateIdRegex: Regex = "\"update_id\":(.+?),".toRegex()
+    val chatIdRegex: Regex = "\"chat\":\\{\"id\":(\\d+),".toRegex()
+    val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
+    val dataRegex: Regex = "\"data\":\"(.+?)\"".toRegex()
 
     while (true) {
 
         Thread.sleep(2000)
-        val updates: String = telegramBotService.getUpdates(botToken, updateId)
+        val updates: String = telegramBotService.getUpdates(updateId)
         println(updates)
 
-        val updateIdRegex: Regex = "\"update_id\":(.+?),".toRegex()
-        val matchResultUpdateID: MatchResult? = updateIdRegex.find(updates)
-        val groupsUpdateID = matchResultUpdateID?.groups
-        val numberUpdateID = groupsUpdateID?.get(1)?.value
+        val numberUpdateID = updateIdRegex.find(updates)?.groups?.get(1)?.value?.toIntOrNull() ?: continue
+        updateId = numberUpdateID + 1
         println(numberUpdateID)
-        if (numberUpdateID != null) {
-            updateId = numberUpdateID.toInt() + 1
-        }
-
-        val chatIdRegex: Regex = "\"id\":(.+?),".toRegex()
-        val matchResultChatId: MatchResult? = chatIdRegex.find(updates)
-        val groupsChatId = matchResultChatId?.groups
-        val numberChatID = groupsChatId?.get(1)?.value?.toInt()
+        val numberChatID = chatIdRegex.find(updates)?.groups?.get(1)?.value?.toInt()
         println(numberChatID)
-
-        val messageTextRegex: Regex = "\"text\":\"(.+?)\"".toRegex()
-        val matchResult: MatchResult? = messageTextRegex.find(updates)
-        val groups = matchResult?.groups
-        val text = groups?.get(1)?.value
+        val text = messageTextRegex.find(updates)?.groups?.get(1)?.value
         println(text)
+        val data = dataRegex.find(updates)?.groups?.get(1)?.value
 
-        var sendMessageUser = ""
-        if (numberChatID != null && text != null) {
-            sendMessageUser = telegramBotService.sendMessage(botToken, numberChatID, text)
+        if (text?.lowercase() == "/start" && numberChatID != null) {
+            telegramBotService.sendMenu(numberChatID)
         }
-        println(sendMessageUser)
+
+        if (data?.lowercase() == LEARN_WORDS && numberChatID != null) {
+            telegramBotService.checkNextQuestionAndSend(trainer.getNextQuestion(), numberChatID)
+        }
+
+        if (data?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true && numberChatID != null) {
+            val indexWord = updates.substringAfterLast(CALLBACK_DATA_ANSWER_PREFIX).substringBefore('"')
+            println(indexWord)
+
+            if (trainer.checkAnswer(indexWord.toInt())) {
+                telegramBotService.sendMessage(numberChatID, "Правильно")
+            } else {
+                telegramBotService.sendMessage(
+                    numberChatID,
+                    "Не правильно: ${trainer.question?.correctAnswer?.wordEnglish} - " +
+                            "${trainer.question?.correctAnswer?.wordRussian}"
+                )
+            }
+            telegramBotService.checkNextQuestionAndSend(trainer.getNextQuestion(), numberChatID)
+        }
+
+        val wordForStatistics = trainer.getStatistics()
+        val textStatistics = "\"Выучено ${wordForStatistics.countLearnWord} из " +
+                "${wordForStatistics.countWordInDictionary} слов" +
+                " | ${
+                    wordForStatistics.countLearnWord.toDouble() /
+                            wordForStatistics.countWordInDictionary * 100
+                }%\""
+
+        if (data?.lowercase() == STATISTICS && numberChatID != null) {
+            telegramBotService.sendMessage(numberChatID, textStatistics)
+        }
     }
 }
+

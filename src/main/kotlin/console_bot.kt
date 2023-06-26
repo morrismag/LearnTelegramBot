@@ -1,9 +1,3 @@
-data class Word(
-    val wordEnglish: String = "",
-    val wordRussian: String = "",
-    var correctAnswersCount: Int = 0
-)
-
 fun main() {
 
     val trainer = try {
