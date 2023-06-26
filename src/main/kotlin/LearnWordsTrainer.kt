@@ -41,7 +41,7 @@ class LearnWordsTrainer(
                 .take(countOfQuestionWords - dictionaryUnlearnWords.size)
         }
 
-        val unlearnWord = dictionaryUnlearnWords.random()
+        val unlearnWord = translateWords.random()
         question = Question(
             variants = translateWords,
             correctAnswer = unlearnWord,
