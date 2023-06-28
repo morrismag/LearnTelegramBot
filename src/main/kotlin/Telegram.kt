@@ -1,6 +1,7 @@
 import TelegramBotService.Companion.CALLBACK_DATA_ANSWER_PREFIX
 import TelegramBotService.Companion.LEARN_WORDS
 import TelegramBotService.Companion.RESET_CLICKED
+import TelegramBotService.Companion.START
 import TelegramBotService.Companion.STATISTICS
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -74,14 +75,16 @@ fun main(args: Array<String>) {
     val botToken = args[0]
     var updateId = 0L
     val telegramBotService = TelegramBotService(botToken)
-    val trainer = LearnWordsTrainer()
     val json = Json { ignoreUnknownKeys = true }
     val trainers = HashMap<Long, LearnWordsTrainer>()
 
     while (true) {
 
         Thread.sleep(2000)
-        val responseString: String = telegramBotService.getUpdates(updateId)
+
+        val result: Result<String> = runCatching { telegramBotService.getUpdates(updateId) }
+        if (result.isFailure) continue
+        val responseString = result.getOrDefault("")
         println(responseString)
 
         val response: Response = json.decodeFromString(responseString)
@@ -104,9 +107,9 @@ fun handleUpdate(
     val numberChatId = update.message?.chat?.id ?: update.callbackQuery?.message?.chat?.id ?: return
     val data = update.callbackQuery?.data
 
-    val trainer =trainers.getOrPut(numberChatId){LearnWordsTrainer("$numberChatId.txt")}
+    val trainer = trainers.getOrPut(numberChatId) { LearnWordsTrainer("$numberChatId.txt") }
 
-    if (text?.lowercase() == "/start") {
+    if (text?.lowercase() == START) {
         telegramBotService.sendMenu(json, numberChatId)
     }
 
@@ -129,6 +132,7 @@ fun handleUpdate(
             )
         }
         telegramBotService.checkNextQuestionAndSend(json, trainer.getNextQuestion(), numberChatId)
+
     }
 
     val wordForStatistics = trainer.getStatistics()
@@ -143,7 +147,7 @@ fun handleUpdate(
         telegramBotService.sendMessage(json, numberChatId, textStatistics)
     }
 
-    if (data == RESET_CLICKED){
+    if (data == RESET_CLICKED) {
         trainer.resetProgress()
         telegramBotService.sendMessage(json, numberChatId, "Прогресс сброшен")
     }

@@ -72,12 +72,12 @@ class TelegramBotService(private val botToken: String) {
             chatId = chatId,
             text = inputQuestion.correctAnswer.wordEnglish,
             replyMarkup = ReplyMarkup(
-                listOf(inputQuestion.variants.mapIndexed { index, word ->
-                    InlineKeyBoard(
-                        text = word.wordRussian, callbackData = "$CALLBACK_DATA_ANSWER_PREFIX$index"
-                    )
-                })
+                listOf(
+                    inputQuestion.variants.mapIndexed { index, word ->
+                        InlineKeyBoard(text = word.wordRussian, callbackData = "$CALLBACK_DATA_ANSWER_PREFIX$index")
+                }
             )
+        )
         )
 
         val requestBodyString = json.encodeToString(requestBody)
@@ -106,7 +106,7 @@ class TelegramBotService(private val botToken: String) {
         const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
         const val URL_API_TELEGRAM = "https://api.telegram.org/bot"
         const val RESET_CLICKED = "reset_clicked"
-
+        const val START = "/start"
     }
 }
 
