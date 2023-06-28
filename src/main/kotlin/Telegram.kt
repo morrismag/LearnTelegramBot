@@ -132,7 +132,10 @@ fun handleUpdate(
             )
         }
         telegramBotService.checkNextQuestionAndSend(json, trainer.getNextQuestion(), numberChatId)
+    }
 
+    if (data?.lowercase() == START) {
+        telegramBotService.sendMenu(json, numberChatId)
     }
 
     val wordForStatistics = trainer.getStatistics()
