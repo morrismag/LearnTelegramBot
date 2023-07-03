@@ -34,3 +34,7 @@
 
 nohup java -jar bot.jar 6285859188:AAE09dXS_kjaDM1p__S_NgovRJilcvdUbcY &
 6285859188:AAE09dXS_kjaDM1p__S_NgovRJilcvdUbcY
+java -jar  build/libs/LearnTelegramBot-1.0-SNAPSHOT-all.jar 6285859188:AAE09dXS_kjaDM1p__S_NgovRJilcvdUbcY
+scp build/libs/LearnTelegramBot-1.0-SNAPSHOT-all.jar root@176.99.12.248:/root/bot.jar
+scp word.txt root@176.99.12.248:/root/word.txt
+ssh root@176.99.12.248
