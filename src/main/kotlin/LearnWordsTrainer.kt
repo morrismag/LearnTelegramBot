@@ -1,3 +1,4 @@
+import kotlinx.serialization.Serializable
 import java.io.File
 
 class Statistics(
@@ -5,6 +6,7 @@ class Statistics(
     val countLearnWord: Int,
 )
 
+@Serializable
 data class Word(
     val wordEnglish: String = "",
     val wordRussian: String = "",
@@ -17,9 +19,9 @@ data class Question(
 )
 
 class LearnWordsTrainer(
+    private val fileName: String = "word.txt",
     private val unlearnWords: Int = 3,
     private val countOfQuestionWords: Int = 4,
-    private val fileName: String = "word.txt",
 ) {
     var question: Question? = null
     private val dictionary = loadDictionary()
@@ -35,13 +37,15 @@ class LearnWordsTrainer(
         if (dictionaryUnlearnWords.isEmpty()) return null
         var translateWords = dictionaryUnlearnWords.shuffled().take(countOfQuestionWords)
 
+        val unlearnWord = translateWords.random()
+
         if (dictionaryUnlearnWords.size < countOfQuestionWords) {
             val dictionaryLearnedWords = dictionary.filter { it.correctAnswersCount >= unlearnWords }
             translateWords = dictionaryUnlearnWords + dictionaryLearnedWords.shuffled()
                 .take(countOfQuestionWords - dictionaryUnlearnWords.size)
         }
 
-        val unlearnWord = translateWords.random()
+
         question = Question(
             variants = translateWords,
             correctAnswer = unlearnWord,
@@ -54,7 +58,7 @@ class LearnWordsTrainer(
             val correctAnswerId = it.variants.indexOf(it.correctAnswer)
             if (correctAnswerId == userAnswerIndex) {
                 it.correctAnswer.correctAnswersCount += 1
-                saveDictionary(dictionary)
+                saveDictionary()
                 true
             } else {
                 false
@@ -82,13 +86,13 @@ class LearnWordsTrainer(
 
     private fun loadDictionary(): List<Word> {
         try {
-            val dictionary = mutableListOf<Word>()
             val wordsFile = File(fileName)
-
-            if (!wordsFile.exists()) createFileDictionary()
-
+            if (!wordsFile.exists()) {
+                File("word.txt").copyTo(wordsFile)
+            }
             val listString: List<String> = wordsFile.readLines()
 
+            val dictionary = mutableListOf<Word>()
             for (line in listString) {
                 val wordList = line.split("|")
                 val word = Word(
@@ -105,7 +109,7 @@ class LearnWordsTrainer(
         }
     }
 
-    private fun saveDictionary(dictionary: List<Word>) {
+    private fun saveDictionary() {
         val wordsFileRewrite = File(fileName)
         wordsFileRewrite.writeText("")
 
@@ -117,6 +121,9 @@ class LearnWordsTrainer(
         }
     }
 
-
+    fun resetProgress() {
+        dictionary.forEach { it.correctAnswersCount = 0 }
+        saveDictionary()
+    }
 }
 
